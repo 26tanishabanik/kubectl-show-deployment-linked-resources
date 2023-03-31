@@ -7,14 +7,11 @@ import (
 	"os"
 	"path/filepath"
 
-	
-	pflag "github.com/spf13/pflag"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-
-	// "github.com/m1gwings/treedrawer/tree"
 	"github.com/tufin/asciitree"
+	"k8s.io/client-go/kubernetes"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	pflag "github.com/spf13/pflag"
 )
 
 func HomeDir() string {
@@ -65,7 +62,6 @@ func GetConfigMaps(clientSet *kubernetes.Clientset, deploymentName, namespace st
 		if ct.Env != nil {
 			for _, en := range ct.Env {
 				if en.ValueFrom != nil {
-					// fmt.Println("Env Config Map: ", en.ValueFrom.ConfigMapKeyRef)
 					configMapList = append(configMapList, en.ValueFrom.ConfigMapKeyRef.Name)
 				}
 			}
@@ -73,7 +69,6 @@ func GetConfigMaps(clientSet *kubernetes.Clientset, deploymentName, namespace st
 		if ct.EnvFrom != nil {
 			for _, enf := range ct.EnvFrom {
 				if enf.ConfigMapRef != nil {
-					// fmt.Println("EnvFrom Config Map: ", enf.ConfigMapRef.Name)
 					configMapList = append(configMapList, enf.ConfigMapRef.Name)
 				}
 			}
@@ -82,7 +77,6 @@ func GetConfigMaps(clientSet *kubernetes.Clientset, deploymentName, namespace st
 	if deployment.Spec.Template.Spec.Volumes != nil {
 		for _, vol := range deployment.Spec.Template.Spec.Volumes {
 			if vol.ConfigMap != nil {
-				// fmt.Println("Volume Config Map: ", vol.ConfigMap.Name)
 				configMapList = append(configMapList, vol.ConfigMap.Name)
 			}
 		}
@@ -98,7 +92,6 @@ func GetSecrets(clientSet *kubernetes.Clientset, deploymentName, namespace strin
 		if ct.Env != nil {
 			for _, en := range ct.Env {
 				if en.ValueFrom != nil {
-					// fmt.Println("Env Config Map: ", en.ValueFrom.ConfigMapKeyRef)
 					secretList = append(secretList, en.ValueFrom.SecretKeyRef.Name)
 				}
 			}
@@ -106,7 +99,6 @@ func GetSecrets(clientSet *kubernetes.Clientset, deploymentName, namespace strin
 		if ct.EnvFrom != nil {
 			for _, enf := range ct.EnvFrom {
 				if enf.SecretRef != nil {
-					// fmt.Println("EnvFrom Config Map: ", enf.ConfigMapRef.Name)
 					secretList = append(secretList, enf.SecretRef.Name)
 				}
 			}
@@ -115,7 +107,6 @@ func GetSecrets(clientSet *kubernetes.Clientset, deploymentName, namespace strin
 	if deployment.Spec.Template.Spec.Volumes != nil {
 		for _, vol := range deployment.Spec.Template.Spec.Volumes {
 			if vol.Secret != nil {
-				// fmt.Println("Volume secret: ", vol.Secret.SecretName)
 				secretList= append(secretList, vol.Secret.SecretName)
 			}
 		}
@@ -131,7 +122,6 @@ func GetVolumes(clientSet *kubernetes.Clientset, deploymentName, namespace strin
 	if deployment.Spec.Template.Spec.Volumes != nil {
 		for _, vol := range deployment.Spec.Template.Spec.Volumes {
 			if vol.Secret == nil && vol.ConfigMap == nil  {
-				// fmt.Println("Volume: ", vol.Name)
 				if vol.Name != ""{
 					volumeList= append(volumeList, vol.Name)
 				}	
@@ -155,15 +145,12 @@ func GetResourcesRelatedToDeployment(deploymentName, namespace string) (string, 
 	}
 	
 	selector, _ := metav1.LabelSelectorAsSelector(deployment.Spec.Selector)
-	// fmt.Println("selector: ", selector)
 	service, err := clientSet.CoreV1().Services("default").List(context.Background(), metav1.ListOptions{LabelSelector: selector.String()})
-	// fmt.Println("service name: ", service.Items[0].Name)
 	if err != nil {
 		fmt.Println("error in getting service name: ", err)
 		return  "", "", nil, nil, nil, err
 	}
 	replicaSet, err := clientSet.AppsV1().ReplicaSets("default").List(context.Background(), metav1.ListOptions{LabelSelector: selector.String()})
-	// fmt.Println("replica set name: ", replicaSet.Items[0].Name)
 	if err != nil {
 		fmt.Println("error in get replica sets: ", err)
 		return  "", "", nil, nil, nil, err
