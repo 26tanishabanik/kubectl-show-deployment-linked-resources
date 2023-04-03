@@ -181,7 +181,18 @@ func main() {
 	var configMapList, volumeList, secretList []string
 	deploymentNamespace := flag.String("n", "default", "kubernetes namespace")
 	deploymentName := flag.String("d", "", "kubernetes deployment name")
+	help := flag.Bool("h", false, "usage ")
 	flag.Parse()
+	if *help {
+		fmt.Println("Name: ")
+		fmt.Println("  kubectl deploymentTree - shows all the resources directly related to the deployment")
+		fmt.Println("The following options are available:")
+		fmt.Println("  -d: provide the name of the deployment")
+		fmt.Println("  -n: provide the namespace for the deployment")
+		fmt.Println("Usage: ")
+		fmt.Println("  kubectl depoymentTree [flags] [options]")
+		return
+	}
 	clientSet, err := ClientSetup()
 	if err != nil {
 		fmt.Println("error in creating client set: ", err)
